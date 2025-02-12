@@ -14,7 +14,7 @@ class UserCreate(BaseModel):
 @router.post("/init_user")
 def init_user(user: UserCreate, session: Session = Depends(get_session)):
     # Verificar si el usuario ya existe
-    existing_user = session.exec(select(User).where(User.username == user.username)).first()
+    existing_user = session.scalars(select(User).where(User.username == user.username)).first()
     if existing_user:
         raise HTTPException(status_code=400, detail="El usuario ya existe")
 

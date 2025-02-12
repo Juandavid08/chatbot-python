@@ -2,6 +2,7 @@ from sqlmodel import SQLModel, create_engine, Session
 import os
 from dotenv import load_dotenv
 from models import User, Message  # Importar los modelos
+from sqlalchemy.orm import Session
 
 # Cargar variables de entorno
 load_dotenv()
@@ -18,5 +19,5 @@ def init_db():
 
 # Dependencia para obtener la sesión de la base de datos
 def get_session():
-    with Session(engine) as session:
-        yield session
+    return Session(engine)  # ✅ Devuelve una sesión sin cerrarla inmediatamente
+
