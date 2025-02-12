@@ -1,6 +1,6 @@
 from sqlmodel import SQLModel, Field
-from typing import Optional
-from datetime import datetime
+from typing import Optional # Importamos el tipo de dato Optional
+from datetime import datetime # Importamos el tipo de dato datetime
 
 
 # Modelo para la tabla de usuarios

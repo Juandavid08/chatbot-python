@@ -14,20 +14,23 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 if not OPENAI_API_KEY:
     raise ValueError("OPENAI_API_KEY no está configurada en las variables de entorno")
 
-# Configurar el router
+# Configuracion del router
 router = APIRouter()
 
-# Definir los esquemas
+# Definicion de los esquemas
 class ChatRequest(BaseModel):
     username: str
     message: str
 
-# Crear el cliente de OpenAI
+# Crear un cliente de OpenAI para interactuar con la API
 client = openai.OpenAI(api_key=OPENAI_API_KEY)
 
+# Crear una ruta para manejar las solicitudes de chat
 @router.post("/ask")
 async def ask(request: ChatRequest, session: Session = Depends(get_session)):
     user = session.scalars(select(User).where(User.username == request.username)).first()
+
+    # Verificar si el usuario existe
     if not user:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
@@ -37,7 +40,7 @@ async def ask(request: ChatRequest, session: Session = Depends(get_session)):
             messages=[{"role": "system", "content": "You are a helpful assistant."},
                       {"role": "user", "content": request.message}]
         )
-        reply = response.choices[0].message.content
+        reply = response.choices[0].message.content or ""  # Evita que sea None
 
         chat_message = Message(username=request.username, question=request.message, response=reply)
         session.add(chat_message)
@@ -54,11 +57,14 @@ async def ask(request: ChatRequest, session: Session = Depends(get_session)):
     finally:
         session.close()
 
+# Crear una ruta para obtener el historial de chat de un usuario
 @router.get("/history/{username}")
 def get_chat_history(username: str, session: Session = Depends(get_session)):
-    user = session.exec(select(User).where(User.username == username)).first()
+    user = session.scalars(select(User).where(User.username == username)).first()
+    
     if not user:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
-    history = session.exec(select(Message).where(Message.username == username).order_by(Message.created_at)).all()
+    history = session.scalars(select(Message).where(Message.username == username).order_by(Message.created_at.desc())).all()  # 🔹 Usa .desc() para ordenar correctamente
+    
     return {"history": history if history else "El usuario no tiene historial de conversaciones."}
