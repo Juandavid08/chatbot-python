@@ -97,10 +97,12 @@ ReDoc: http://127.0.0.1:8000/redoc
 
 ### 🔬 Pruebas unitarias
 **Primero instala la libreria pytest y httpx para realizar las pruebas**
+
 pip install pytest httpx
 
 
 **Luego ejecuta las pruebas con:**
+
 pytest -v
 
 
